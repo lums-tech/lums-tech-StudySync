@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StudySync</title>
+    <link rel="stylesheet" href="In.css">
+    
+    <!-- PWA & MOBILE BACKGROUND MANIFEST LINKS -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2693/2693507.png">
+    
+    <!-- Firebase CDN scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body id="page-app">
+    <div id="viewer-banner" class="viewer-banner" style="display:none;">👀 VIEW MODE: Read-only mode.</div>
+    
+    <div class="app-layout">
+        <nav class="sidebar">
+            <div class="brand-title p-20 text-center">StudySync</div>
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="switchTab('dashboard')">📊 <span>Dashboard</span></li>
+                <li class="nav-item" onclick="switchTab('schedule')">🕒 <span>Schedule</span></li>
+                <li class="nav-item" onclick="switchTab('tasks')">✅ <span>Tasks</span></li>
+                <li class="nav-item" onclick="switchTab('exams')">📝 <span>Exams</span></li>
+                <li class="nav-item" onclick="switchTab('subjects')">📚 <span>Subjects</span></li>
+                <li class="nav-item" onclick="switchTab('calendar')">📅 <span>Calendar</span></li>
+                <li class="nav-item" onclick="switchTab('settings')">⚙️ <span>Settings</span></li>
+            </ul>
+            
+            <div class="sidebar-profile" onclick="switchTab('profile')">
+                <div class="avatar" id="sb-avatar">U</div>
+                <div class="sb-info">
+                    <strong id="sb-nickname">User</strong>
+                    <small id="sb-username">@username</small>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="app-header">
+                <div class="user-greeting-box">
+                    <div class="avatar header-avatar-mobile" onclick="switchTab('profile')" id="hdr-avatar">U</div>
+                    <div>
+                        <p id="header-greeting" class="text-light">Good day!</p>
+                        <h2 id="page-title">Dashboard</h2>
+                    </div>
+                </div>
+
+                <!-- REAL LIVE TIME CLOCK WIDGET -->
+                <div class="live-clock-badge">
+                    <span id="live-time">00:00:00 AM</span>
+                    <small id="live-date">Mon, Jan 1</small>
+                </div>
+
+                <div class="flex align-center relative-container">
+                    <input type="text" id="search-bar" class="search-input" placeholder="Search tasks..." oninput="globalSearch()">
+                    
+                    <div class="notification-wrapper ml-10">
+                        <div class="notification-icon" onclick="toggleNotifDropdown()" title="Notifications">🔔<span id="notif-badge" class="notif-dot" style="display:none;"></span></div>
+                        <div id="notif-dropdown" class="notif-dropdown-box">
+                            <div class="notif-header"><strong>Activity History & Notifications</strong></div>
+                            <div id="notif-content-list" class="notif-body-list">
+                                <p class="text-light text-center">No history yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section id="dashboard" class="view-section active">
+                
+                <!-- MOBILE EXCLUSIVE QUICK WIDGETS ENGINE -->
+                <div class="mobile-widgets-bar edit-only mb-20">
+                    <div class="mobile-widget-header">
+                        <span>⚡ Quick Mobile Actions</span>
+                    </div>
+                    <div class="mobile-widget-buttons">
+                        <button class="m-widget-btn" onclick="openModal('modal-task')">
+                            <span class="m-w-icon">✅</span>
+                            <span>+ Task</span>
+                        </button>
+                        <button class="m-widget-btn" onclick="openModal('modal-schedule')">
+                            <span class="m-w-icon">🕒</span>
+                            <span>+ Class</span>
+                        </button>
+                        <button class="m-widget-btn" onclick="openModal('modal-exam')">
+                            <span class="m-w-icon">📝</span>
+                            <span>+ Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-carousel mb-20">
+                    <div class="card stat-card">
+                        <h3>Classes Today</h3>
+                        <h1 id="dash-classes">0</h1>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Pending Tasks</h3>
+                        <h1 id="dash-pending">0</h1>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Upcoming Exams</h3>
+                        <h1 id="dash-exams">0</h1>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Pending Workload</h3>
+                        <div class="progress-bg"><div class="progress-fill" id="dash-progress"></div></div>
+                        <small id="dash-prog-text">0% Pending Load</small>
+                    </div>
+                </div>
+
+                <div class="grid-2 gap-20">
+                    <div class="card">
+                        <div class="flex-between">
+                            <h3>Today's Schedule</h3>
+                            <button class="btn btn-sm btn-outline edit-only" onclick="switchTab('schedule')">View All</button>
+                        </div>
+                        <ul id="dash-sched-list" class="list-group mt-10"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="flex-between">
+                            <h3>Urgent Tasks</h3>
+                            <button class="btn btn-sm btn-outline edit-only" onclick="switchTab('tasks')">View All</button>
+                        </div>
+                        <ul id="dash-task-list" class="list-group mt-10"></ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="schedule" class="view-section">
+                <div class="flex-between mb-20">
+                    <h3>Weekly Timetable</h3>
+                    <button class="btn btn-primary edit-only" onclick="openModal('modal-schedule')">+ Add Class</button>
+                </div>
+                <div class="card table-responsive">
+                    <table class="data-table">
+                        <thead><tr><th>Subject</th><th>Day</th><th>Time</th><th>Room</th><th class="edit-only">Action</th></tr></thead>
+                        <tbody id="sched-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tasks" class="view-section">
+                <div class="flex-between mb-20">
+                    <h3>Manage Tasks & Assignments</h3>
+                    <div class="flex gap-10">
+                        <select id="task-filter" class="input-field" onchange="renderTasks()"><option value="All">All Tasks</option><option value="Pending">Pending</option><option value="Completed">Completed</option></select>
+                        <button class="btn btn-primary edit-only" onclick="openModal('modal-task')">+ Add Task</button>
+                    </div>
+                </div>
+                <ul id="tasks-list" class="list-group"></ul>
+            </section>
+
+            <section id="exams" class="view-section">
+                <div class="flex-between mb-20"><h3>Upcoming Exams</h3><button class="btn btn-primary edit-only" onclick="openModal('modal-exam')">+ Add Exam</button></div>
+                <div id="exams-grid" class="grid-3 gap-20"></div>
+            </section>
+
+            <section id="subjects" class="view-section">
+                <div class="flex-between mb-20"><h3>Enrolled Subjects</h3><button class="btn btn-primary edit-only" onclick="openModal('modal-subject')">+ Add Subject</button></div>
+                <div id="subs-grid" class="grid-3 gap-20"></div>
+            </section>
+
+            <section id="calendar" class="view-section">
+                <div class="card">
+                    <div class="flex-between mb-20">
+                        <h3 id="cal-month-year">Month Year</h3>
+                        <div class="flex gap-10">
+                            <button class="btn btn-outline" onclick="changeMonth(-1)">◀ Prev</button>
+                            <button class="btn btn-outline" onclick="changeMonth(1)">Next ▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid-header">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div id="calendar-days" class="calendar-grid-body"></div>
+                </div>
+            </section>
+
+            <section id="profile" class="view-section">
+                <div class="card text-center" style="max-width:500px; margin:0 auto;">
+                    <div class="avatar avatar-lg mx-auto mb-10" id="prof-avatar-img">U</div>
+                    <h2 id="prof-nick">Nickname</h2>
+                    <p class="text-primary" id="prof-user">@username</p>
+                    <p class="text-light mt-10" id="prof-name">Full Name</p>
+                    <div class="badge-group mt-10">
+                        <span class="badge bg-primary" id="prof-course">Course</span>
+                        <span class="badge bg-primary" id="prof-year">Year</span>
+                        <span class="badge bg-primary" id="prof-sec">Section</span>
+                    </div>
+                    <p class="mt-20 text-italic" id="prof-bio">Bio</p>
+                    <button class="btn btn-outline mt-20 edit-only w-100" onclick="openModal('modal-profile')">Edit Profile</button>
+                    <button class="btn btn-danger mt-10 w-100" onclick="logout()">Logout</button>
+                </div>
+            </section>
+
+            <section id="settings" class="view-section">
+                <div class="card mb-20">
+                    <h3>Appearance & Notifications</h3>
+                    <div class="flex-between mt-10"><span>Dark Mode</span><button class="btn btn-outline" onclick="toggleTheme()">Toggle Theme</button></div>
+                    <div class="flex-between mt-10">
+                        <span>Push Notifications</span>
+                        <button id="notif-toggle-btn" class="btn btn-primary" onclick="toggleNotificationSetting()">Enable Alerts</button>
+                    </div>
+                </div>
+                <div class="card mb-20">
+                    <h3>Data Management (JSON)</h3>
+                    <div class="flex gap-10 mt-10">
+                        <button class="btn btn-primary" onclick="exportData()">Export Backup</button>
+                        <button class="btn btn-outline edit-only" onclick="document.getElementById('import-file').click()">Import Backup</button>
+                        <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <div class="fab-container edit-only">
+            <div class="fab-menu" id="fab-menu">
+                <button onclick="openModal('modal-task')">Add Task</button>
+                <button onclick="openModal('modal-schedule')">Add Class</button>
+                <button onclick="openModal('modal-exam')">Add Exam</button>
+                <button onclick="openModal('modal-subject')">Add Subject</button>
+            </div>
+            <button class="fab" onclick="toggleFabMenu()">+</button>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal-task" class="modal">
+        <div class="modal-box">
+            <h3>Task Details</h3>
+            <form id="form-task">
+                <input type="hidden" id="t-id">
+                
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="t-title" class="input-field" placeholder="e.g. Assignment 1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="t-sub" class="input-field sub-dropdown" required></select>
+                </div>
+                
+                <div class="grid-2 gap-10">
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        <input type="date" id="t-date" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Due Time (Alarm)</label>
+                        <input type="time" id="t-time" class="input-field" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="t-pri" class="input-field">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+
+                <div class="flex-end gap-10 mt-20">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-task')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-schedule" class="modal">
+        <div class="modal-box">
+            <h3>Class Details</h3>
+            <form id="form-sched">
+                <input type="hidden" id="s-id">
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="s-sub" class="input-field sub-dropdown" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Day</label>
+                    <select id="s-day" class="input-field" required>
+                        <option>Monday</option>
+                        <option>Tuesday</option>
+                        <option>Wednesday</option>
+                        <option>Thursday</option>
+                        <option>Friday</option>
+                        <option>Saturday</option>
+                    </select>
+                </div>
+                <div class="grid-2 gap-10">
+                    <div class="form-group"><label>Start Time (Alarm)</label><input type="time" id="s-start" class="input-field" required></div>
+                    <div class="form-group"><label>End Time</label><input type="time" id="s-end" class="input-field" required></div>
+                </div>
+                <div class="form-group"><label>Room</label><input type="text" id="s-room" class="input-field" required></div>
+                <div class="flex-end gap-10 mt-20">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-schedule')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-subject" class="modal">
+        <div class="modal-box">
+            <h3>Subject</h3>
+            <form id="form-sub">
+                <input type="hidden" id="sub-id">
+                <div class="form-group"><label>Name</label><input type="text" id="sub-name" class="input-field" required></div>
+                <div class="form-group"><label>Code</label><input type="text" id="sub-code" class="input-field"></div>
+                <div class="form-group"><label>Teacher</label><input type="text" id="sub-teacher" class="input-field"></div>
+                <div class="flex-end gap-10 mt-20">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-subject')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-exam" class="modal">
+        <div class="modal-box">
+            <h3>Exam Details</h3>
+            <form id="form-exam">
+                <input type="hidden" id="e-id">
+                <div class="form-group"><label>Exam Name</label><input type="text" id="e-name" class="input-field" required></div>
+                <div class="form-group"><label>Subject</label><select id="e-sub" class="input-field sub-dropdown" required></select></div>
+                <div class="grid-2 gap-10">
+                    <div class="form-group"><label>Exam Date</label><input type="date" id="e-date" class="input-field" required></div>
+                    <div class="form-group"><label>Exam Time (Alarm)</label><input type="time" id="e-time" class="input-field" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="e-pri" class="input-field">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div class="flex-end gap-10 mt-20">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-exam')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Exam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-profile" class="modal">
+        <div class="modal-box">
+            <h3>Edit Profile</h3>
+            <form id="form-prof">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="p-fullname" disabled class="input-field disabled-input">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group"><label>Nickname</label><input type="text" id="p-nick" class="input-field" required></div>
+                    <div class="form-group"><label>Course / Program</label><input type="text" id="p-course" class="input-field" required></div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group"><label>Year Level</label><input type="text" id="p-year" class="input-field" required></div>
+                    <div class="form-group"><label>Section</label><input type="text" id="p-section" class="input-field" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Upload Local Profile Picture</label>
+                    <input type="file" id="p-avatar-file" accept="image/*" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <input type="text" id="p-bio" class="input-field" placeholder="Future Developer 🚀">
+                </div>
+                <div class="flex-end gap-10 mt-20">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-profile')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="inn.js"></script>
+</body>
+</html>

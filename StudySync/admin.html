@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - PlannerApp</title>
+    <link rel="stylesheet" href="In.css">
+</head>
+<body id="page-admin">
+    <div class="app-layout">
+        <nav class="sidebar">
+            <div class="brand-title text-center p-20">PlannerAdmin</div>
+            <ul class="nav-menu">
+                <li class="active" onclick="adminTab('admin-dash')">📊 Dashboard</li>
+                <li onclick="adminTab('admin-users')">👥 User Management</li>
+                <li onclick="adminTab('admin-viewers')">👀 Authorized Viewers</li>
+                <li class="text-danger" onclick="logout()">🚪 Logout</li>
+            </ul>
+        </nav>
+        
+        <main class="main-content">
+            <header class="app-header">
+                <h2>Admin Control Panel</h2>
+            </header>
+
+            <section id="admin-dash" class="view-section active">
+                <div class="grid-4 stats-container mb-20">
+                    <div class="card stat-card"><h3>Total Users</h3><h1 id="stat-tot-users">0</h1></div>
+                    <div class="card stat-card"><h3>Total Students</h3><h1 id="stat-students">0</h1></div>
+                    <div class="card stat-card"><h3>Viewers Added</h3><h1 id="stat-viewers">0</h1></div>
+                    <div class="card stat-card"><h3>Total Tasks Logged</h3><h1 id="stat-tasks">0</h1></div>
+                </div>
+                <div class="card">
+                    <h3>Recent Login Activity</h3>
+                    <ul id="admin-logs" class="list-group mt-10"></ul>
+                </div>
+            </section>
+
+            <section id="admin-users" class="view-section">
+                <div class="card">
+                    <h3>Registered Students</h3>
+                    <div class="table-responsive mt-10">
+                        <table class="data-table">
+                            <thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+                            <tbody id="admin-user-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="admin-viewers" class="view-section">
+                <div class="card">
+                    <div class="flex-between">
+                        <h3>Authorized Viewer Emails</h3>
+                        <div class="flex">
+                            <input type="email" id="new-viewer-email" placeholder="viewer@email.com">
+                            <button class="btn btn-primary ml-10" onclick="addViewer()">Authorize</button>
+                        </div>
+                    </div>
+                    <ul id="admin-viewer-list" class="list-group mt-20"></ul>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="inn.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login - StudySync</title>
+    <link rel="stylesheet" href="In.css">
+    
+    <!-- Firebase CDN scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body id="page-login" class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="app-logo">📚</div>
+                <h1 class="brand-title">StudySync</h1>
+                <p class="brand-subtitle">Your Student Academic Planner</p>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-id">Email or Username</label>
+                    <input type="text" id="login-id" class="input-field" placeholder="jay123 or jay@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-pass">Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="login-pass" class="input-field" placeholder="••••••••" required>
+                        <button type="button" class="btn-icon pass-toggle" onclick="togglePass('login-pass')">👁️</button>
+                    </div>
+                </div>
+
+                <div id="login-error" class="error-text"></div>
+
+                <button type="submit" class="btn btn-primary btn-auth w-100 mt-10">Login</button>
+            </form>
+
+            <div class="divider"><span>OR</span></div>
+
+            <button class="btn btn-outline btn-auth w-100 flex align-center gap-10" onclick="loginWithGoogle()">
+                <span class="google-icon">🔍</span> Continue with Google
+            </button>
+
+            <p class="auth-footer text-center mt-20">
+                Don't have an account? <a href="register.html" class="auth-link">Create Account</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="inn.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Account - StudySync</title>
+    <link rel="stylesheet" href="In.css">
+    
+    <!-- Firebase CDN scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="app-logo">📚</div>
+                <h1 class="brand-title">Create Account</h1>
+                <p class="brand-subtitle">Your Student Academic Planner</p>
+            </div>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-user" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="reg-pass" class="input-field" required>
+                        <button type="button" class="pass-toggle" onclick="togglePass('reg-pass')">👁️</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="reg-pass2" class="input-field" required>
+                        <button type="button" class="pass-toggle" onclick="togglePass('reg-pass2')">👁️</button>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Nickname</label>
+                        <input type="text" id="reg-nick" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Course / Program</label>
+                        <input type="text" id="reg-course" class="input-field" required>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Year Level</label>
+                        <input type="text" id="reg-year" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Section</label>
+                        <input type="text" id="reg-section" class="input-field" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Bio / Motto</label>
+                    <input type="text" id="reg-bio" class="input-field">
+                </div>
+
+                <div id="reg-error" class="error-text"></div>
+
+                <button type="submit" class="btn btn-primary btn-auth w-100 mt-10">Register Account</button>
+            </form>
+
+            <div class="auth-footer text-center mt-20">
+                Already have an account? <a href="login.html" class="auth-link">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="inn.js"></script>
+</body>
+</html>
